@@ -60,6 +60,33 @@
       background: rgba(0, 0, 0, 0.7);
       border: 1px solid rgba(255, 255, 255, 0.7);
     }
+
+    /* 自訂控制器 */
+    .controls {
+      position: fixed;
+      bottom: 20px;
+      left: 50%;
+      transform: translateX(-50%);
+      display: flex;
+      align-items: center;
+      gap: 10px;
+      z-index: 20;
+      color: #fff;
+      font-family: system-ui, sans-serif;
+    }
+
+    .controls button {
+      padding: 6px 12px;
+      border: none;
+      border-radius: 4px;
+      background: rgba(0,0,0,0.6);
+      color: #fff;
+      cursor: pointer;
+    }
+
+    .controls input[type="range"] {
+      width: 300px;
+    }
   </style>
 </head>
 <body>
@@ -79,23 +106,51 @@
     <span>Tap to unmute</span>
   </div>
 
+  <!-- 控制器 -->
+  <div class="controls">
+    <button id="playPause">Pause</button>
+    <input type="range" id="progress" value="0" min="0" max="100">
+  </div>
+
   <script>
     const video = document.getElementById('bgVideo');
     const overlay = document.getElementById('unmuteOverlay');
+    const playPauseBtn = document.getElementById('playPause');
+    const progressBar = document.getElementById('progress');
 
-    // 點任何地方在覆蓋層上：嘗試開聲 + 播放
+    // 點擊覆蓋層：開聲
     overlay.addEventListener('click', async () => {
       try {
         video.muted = false;
-        await video.play();    // 某些瀏覽器會要求在 click 事件中呼叫 play
+        await video.play();
       } catch (e) {
-        // 若失敗，可以視需要在這裡顯示錯誤訊息
         console.log(e);
       }
-      overlay.style.display = 'none'; // 點過一次就隱藏
+      overlay.style.display = 'none';
+    });
+
+    // 播放/暫停按鈕
+    playPauseBtn.addEventListener('click', () => {
+      if (video.paused) {
+        video.play();
+        playPauseBtn.textContent = 'Pause';
+      } else {
+        video.pause();
+        playPauseBtn.textContent = 'Play';
+      }
+    });
+
+    // 更新進度條
+    video.addEventListener('timeupdate', () => {
+      const percent = (video.currentTime / video.duration) * 100;
+      progressBar.value = percent;
+    });
+
+    // 拖曳進度條控制影片
+    progressBar.addEventListener('input', () => {
+      const time = (progressBar.value / 100) * video.duration;
+      video.currentTime = time;
     });
   </script>
 </body>
 </html>
-
-
